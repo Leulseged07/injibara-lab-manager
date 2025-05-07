@@ -1,12 +1,15 @@
 
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import { Menu, X, ChevronDown } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { Menu, X, ChevronDown, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const { isAuthenticated, user, logout } = useAuth();
+  const navigate = useNavigate();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -18,6 +21,11 @@ const Navigation = () => {
     } else {
       setActiveDropdown(dropdown);
     }
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate("/");
   };
 
   const menuItems = [
@@ -58,9 +66,11 @@ const Navigation = () => {
       <div className="university-container">
         <div className="flex items-center justify-between py-4">
           <div className="flex items-center space-x-2">
-            <span className="text-xl md:text-2xl font-bold font-['Playfair_Display']">
-              Injibara University
-            </span>
+            <Link to="/">
+              <span className="text-xl md:text-2xl font-bold font-['Playfair_Display']">
+                Injibara University
+              </span>
+            </Link>
           </div>
 
           {/* Desktop Navigation */}
@@ -105,7 +115,25 @@ const Navigation = () => {
           </div>
 
           <div className="hidden md:block">
-            <Button className="university-button-secondary">Login</Button>
+            {isAuthenticated ? (
+              <div className="flex items-center gap-4">
+                <Button 
+                  variant="ghost"
+                  className="text-white hover:text-university-gold hover:bg-transparent"
+                  onClick={() => navigate("/dashboard")}
+                >
+                  <User className="mr-2" size={18} />
+                  {user?.name}
+                </Button>
+                <Button className="university-button-secondary" onClick={handleLogout}>
+                  Logout
+                </Button>
+              </div>
+            ) : (
+              <Button className="university-button-secondary" onClick={() => navigate("/login")}>
+                Login
+              </Button>
+            )}
           </div>
 
           {/* Mobile menu button */}
@@ -159,9 +187,35 @@ const Navigation = () => {
                 )}
               </div>
             ))}
-            <div className="px-4 py-4">
-              <Button className="university-button-secondary w-full">Login</Button>
-            </div>
+            {isAuthenticated ? (
+              <div className="px-4 py-4 space-y-2">
+                <Button 
+                  className="w-full flex justify-center items-center"
+                  onClick={() => {
+                    navigate("/dashboard");
+                    toggleMenu();
+                  }}
+                >
+                  <User className="mr-2" size={18} />
+                  Dashboard
+                </Button>
+                <Button className="university-button-secondary w-full" onClick={handleLogout}>
+                  Logout
+                </Button>
+              </div>
+            ) : (
+              <div className="px-4 py-4">
+                <Button 
+                  className="university-button-secondary w-full"
+                  onClick={() => {
+                    navigate("/login");
+                    toggleMenu();
+                  }}
+                >
+                  Login
+                </Button>
+              </div>
+            )}
           </div>
         )}
       </div>
